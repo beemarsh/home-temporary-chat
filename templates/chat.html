@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ config.ui.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-{{ config.ui.theme }}">
+    <div class="chat-app">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-left">
+                <h1>{{ config.ui.title }}</h1>
+                <span class="user-count" id="userCount">0 online</span>
+            </div>
+            <div class="header-right">
+                <span class="ttl-badge">msgs expire {{ config.chat.message_ttl_seconds }}s</span>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="messages-list" id="messagesList"></div>
+        </div>
+
+        <!-- Upload preview -->
+        <div class="upload-preview" id="uploadPreview" style="display:none;">
+            <span class="upload-filename" id="uploadFilename"></span>
+            <button class="upload-cancel" id="uploadCancel">&times;</button>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+            <button class="btn-attach" id="btnAttach" title="Attach file">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                </svg>
+            </button>
+            <input type="file" id="fileInput" style="display:none;">
+            <textarea id="messageInput" placeholder="Type a message..." rows="1" maxlength="{{ config.chat.max_message_length }}"></textarea>
+            <button class="btn-send" id="btnSend" title="Send">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/static/chat.js"></script>
+</body>
+</html>

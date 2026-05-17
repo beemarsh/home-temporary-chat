@@ -1,0 +1,15 @@
+[project]
+name = "home-temporary-chat"
+version = "1.0.0"
+description = "Ephemeral encrypted chat for your home network"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "flask-socketio>=5.3",
+    "pyyaml>=6.0",
+    "gevent>=24.0",
+    "gevent-websocket>=0.10",
+]
+
+[project.scripts]
+home-chat = "server:main"

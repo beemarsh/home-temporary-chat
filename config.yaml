@@ -1,0 +1,35 @@
+# ─────────────────────────────────────────────
+# home-temporary-chat configuration
+# ─────────────────────────────────────────────
+
+server:
+  host: "0.0.0.0"            # Bind to all interfaces (filtered to LAN in app)
+  port: 8443
+  hostname: "chat.home"      # Local DNS name (add to /etc/hosts or dnsmasq)
+
+auth:
+  password: "changeme"       # Password required to enter the chat
+
+chat:
+  message_ttl_seconds: 120   # Messages auto-delete after this many seconds
+  max_messages: 200          # Max messages kept in memory before oldest purged
+  max_message_length: 5000   # Max characters per message
+
+uploads:
+  enabled: true
+  max_file_size_mb: 50       # Max single file size in MB
+  allowed_extensions:        # Empty list = allow all
+    []
+  upload_dir: "uploads"      # Relative to project root
+
+network:
+  allowed_subnets:           # Only these subnets can connect
+    - "192.168.0.0/16"
+    - "10.0.0.0/8"
+    - "172.16.0.0/12"
+    - "127.0.0.0/8"
+
+ui:
+  title: "Home Chat"
+  theme: "dark"              # "dark" or "light"
+  show_timestamps: true
