@@ -8,7 +8,9 @@ server:
   hostname: "chat.home"      # Local DNS name (add to /etc/hosts or dnsmasq)
 
 auth:
-  password: "changeme"       # Password required to enter the chat
+  users_file: "users.json"   # Where registered users are stored
+  max_username_length: 20
+  min_password_length: 3
 
 chat:
   message_ttl_seconds: 120   # Messages auto-delete after this many seconds

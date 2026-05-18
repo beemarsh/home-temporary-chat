@@ -15,16 +15,44 @@
             {% if error %}
             <div class="error-banner">{{ error }}</div>
             {% endif %}
-            <form method="POST" autocomplete="off">
+            <form method="POST" autocomplete="off" id="authForm">
                 <div class="form-group">
-                    <input type="text" name="username" placeholder="Nickname" maxlength="20" required autofocus>
+                    <input type="text" name="username" placeholder="Nickname" maxlength="{{ config.auth.max_username_length }}" required autofocus>
                 </div>
                 <div class="form-group">
                     <input type="password" name="password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn-primary">Enter Chat</button>
+                <input type="hidden" name="action" id="actionField" value="login">
+                <button type="submit" class="btn-primary" id="btnSubmit">Sign In</button>
             </form>
+            <div class="auth-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a href="#" id="toggleLink">Register</a>
+            </div>
         </div>
     </div>
+    <script>
+        const actionField = document.getElementById("actionField");
+        const btnSubmit = document.getElementById("btnSubmit");
+        const toggleText = document.getElementById("toggleText");
+        const toggleLink = document.getElementById("toggleLink");
+        let isLogin = true;
+
+        toggleLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            if (isLogin) {
+                actionField.value = "login";
+                btnSubmit.textContent = "Sign In";
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = "Register";
+            } else {
+                actionField.value = "register";
+                btnSubmit.textContent = "Create Account";
+                toggleText.textContent = "Already have an account?";
+                toggleLink.textContent = "Sign In";
+            }
+        });
+    </script>
 </body>
 </html>

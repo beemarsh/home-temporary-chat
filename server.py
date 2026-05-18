@@ -3,9 +3,9 @@
 
 import hashlib
 import ipaddress
+import json
 import os
 import secrets
-import shutil
 import threading
 import time
 import uuid
@@ -54,6 +54,63 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 messages = []  # list of dicts
 messages_lock = threading.Lock()
 online_users = {}  # sid -> username
+
+
+# ── User storage ─────────────────────────────────────────────────────────────
+
+USERS_FILE = ROOT / CFG["auth"]["users_file"]
+users_lock = threading.Lock()
+
+
+def _load_users() -> dict:
+    if USERS_FILE.exists():
+        with open(USERS_FILE) as f:
+            return json.load(f)
+    return {}
+
+
+def _save_users(users: dict):
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+
+def _hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    h = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}:{h}"
+
+
+def _verify_password(password: str, stored: str) -> bool:
+    salt, h = stored.split(":", 1)
+    return hashlib.sha256((salt + password).encode()).hexdigest() == h
+
+
+def register_user(username: str, password: str) -> str | None:
+    """Register a new user. Returns error string or None on success."""
+    max_len = CFG["auth"]["max_username_length"]
+    min_pw = CFG["auth"]["min_password_length"]
+
+    if not username or len(username) > max_len:
+        return f"Nickname must be 1-{max_len} characters"
+    if len(password) < min_pw:
+        return f"Password must be at least {min_pw} characters"
+
+    with users_lock:
+        users = _load_users()
+        if username.lower() in {u.lower() for u in users}:
+            return "Nickname already taken"
+        users[username] = _hash_password(password)
+        _save_users(users)
+    return None
+
+
+def authenticate_user(username: str, password: str) -> bool:
+    with users_lock:
+        users = _load_users()
+    stored = users.get(username)
+    if not stored:
+        return False
+    return _verify_password(password, stored)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -124,12 +181,24 @@ def index():
 def login():
     error = None
     if request.method == "POST":
-        pw = request.form.get("password", "")
-        if pw == CFG["auth"]["password"]:
-            session["authed"] = True
-            session["username"] = request.form.get("username", "anon").strip()[:20] or "anon"
-            return redirect(url_for("index"))
-        error = "Wrong password"
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        action = request.form.get("action", "login")
+
+        if action == "register":
+            err = register_user(username, password)
+            if err:
+                error = err
+            else:
+                session["authed"] = True
+                session["username"] = username
+                return redirect(url_for("index"))
+        else:
+            if authenticate_user(username, password):
+                session["authed"] = True
+                session["username"] = username
+                return redirect(url_for("index"))
+            error = "Wrong nickname or password"
     return render_template("login.html", error=error, config=CFG)
 
 
@@ -245,7 +314,7 @@ def main():
     print(f"  Listening on http://{cfg['server']['host']}:{cfg['server']['port']}")
     print(f"  Local URL: http://{cfg['server']['hostname']}:{cfg['server']['port']}")
     print(f"  Messages expire after {cfg['chat']['message_ttl_seconds']}s")
-    print(f"  Password: {'(set)' if cfg['auth']['password'] != 'changeme' else '⚠  using default \"changeme\"'}")
+    print(f"  Users file: {cfg['auth']['users_file']}")
     print()
 
     socketio.run(
