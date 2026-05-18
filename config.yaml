@@ -4,7 +4,7 @@
 
 server:
   host: "0.0.0.0"            # Bind to all interfaces (filtered to LAN in app)
-  port: 8443
+  port: 80
   hostname: "chat.home"      # Local DNS name (add to /etc/hosts or dnsmasq)
 
 auth:
