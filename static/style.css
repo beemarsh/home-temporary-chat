@@ -201,6 +201,115 @@ html, body {
 
 .btn-logout:hover { background: rgba(255, 68, 102, 0.1); }
 
+/* ── E2E status ──────────────────────────────────────────── */
+.e2e-status {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.e2e-status.active {
+    color: var(--success);
+    background: rgba(68, 221, 136, 0.12);
+}
+
+.e2e-status.inactive {
+    color: var(--danger);
+    background: rgba(255, 68, 102, 0.12);
+}
+
+.btn-e2e-change {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    transition: color var(--transition);
+}
+
+.btn-e2e-change:hover { color: var(--accent); }
+
+.msg-e2e-badge {
+    font-size: 0.55rem;
+    color: var(--success);
+    background: rgba(68, 221, 136, 0.15);
+    padding: 1px 6px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+}
+
+/* ── E2E Modal ───────────────────────────────────────────── */
+.e2e-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    padding: 20px;
+}
+
+.e2e-modal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+.e2e-modal-icon {
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+
+.e2e-modal-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.e2e-modal-card p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.btn-skip {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background var(--transition), color var(--transition);
+}
+
+.btn-skip:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.e2e-modal-hint {
+    font-size: 0.7rem !important;
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    opacity: 0.7;
+}
+
 /* ── Messages ─────────────────────────────────────────────── */
 .messages-container {
     flex: 1;

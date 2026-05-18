@@ -275,12 +275,14 @@ def ws_message(data):
     text = (data.get("text") or "").strip()
     file_id = data.get("file_id")
     filename = data.get("filename")
+    encrypted = bool(data.get("encrypted"))
 
     if not text and not file_id:
         return
 
+    # Encrypted text is base64-encoded ciphertext, allow larger size
     max_len = CFG["chat"]["max_message_length"]
-    if text and len(text) > max_len:
+    if not encrypted and text and len(text) > max_len:
         text = text[:max_len]
 
     msg = {
@@ -289,6 +291,7 @@ def ws_message(data):
         "text": text,
         "file_id": file_id,
         "filename": filename,
+        "encrypted": encrypted,
         "ts": time.time(),
         "time_str": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
         "ttl": CFG["chat"]["message_ttl_seconds"],
