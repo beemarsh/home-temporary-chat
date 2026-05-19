@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ config.ui.title }}</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="theme-{{ config.ui.theme }}">
     <div class="chat-app">
@@ -22,7 +22,7 @@
                     </svg>
                 </button>
                 <span class="ttl-badge">msgs expire {{ config.chat.message_ttl_seconds }}s</span>
-                <a href="/logout" class="btn-logout">Logout</a>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
             </div>
         </header>
 
@@ -73,9 +73,13 @@
         </div>
     </div>
 
+    <script>
+      // Public URL prefix this app is mounted under (e.g. "/chat"). Empty when served at root.
+      window.__APP_PREFIX__ = {{ request.script_root | tojson }};
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <script src="/static/crypto.js"></script>
-    <script src="/static/chat.js"></script>
+    <script src="{{ url_for('static', filename='crypto.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
 </body>
 </html>

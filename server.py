@@ -44,6 +44,27 @@ CFG = load_config()
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = secrets.token_hex(32)
 
+
+class ReverseProxyPrefix:
+    """Honor X-Forwarded-Prefix from the hub so url_for() emits /chat/* links.
+
+    Caddy's `handle_path /chat/*` strips the prefix before forwarding, so
+    PATH_INFO already arrives without it. Setting SCRIPT_NAME tells Flask the
+    app is mounted at that prefix when building URLs.
+    """
+
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        prefix = environ.get("HTTP_X_FORWARDED_PREFIX", "")
+        if prefix:
+            environ["SCRIPT_NAME"] = prefix.rstrip("/")
+        return self.wsgi_app(environ, start_response)
+
+
+app.wsgi_app = ReverseProxyPrefix(app.wsgi_app)
+
 socketio = SocketIO(app, async_mode="gevent", cors_allowed_origins="*", max_http_buffer_size=CFG["uploads"]["max_file_size_mb"] * 1024 * 1024)
 
 UPLOAD_DIR = ROOT / CFG["uploads"]["upload_dir"]
@@ -160,10 +181,22 @@ def purge_expired():
 # ── Middleware ────────────────────────────────────────────────────────────────
 
 
+TRUSTED_PROXIES = {"127.0.0.1", "::1"}
+
+
+def real_client_ip() -> str:
+    """Return the real client IP, trusting X-Real-IP only from loopback peers."""
+    peer = request.remote_addr or ""
+    if peer in TRUSTED_PROXIES:
+        forwarded = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        if forwarded:
+            return forwarded
+    return peer
+
+
 @app.before_request
 def check_network():
-    client_ip = request.remote_addr
-    if not is_allowed_network(client_ip):
+    if not is_allowed_network(real_client_ip()):
         abort(403, "Access denied: not on the local network")
 
 
@@ -314,8 +347,8 @@ def main():
 
     print(f"\n  Home Temporary Chat")
     print(f"  ───────────────────────────")
-    print(f"  Listening on http://{cfg['server']['host']}:{cfg['server']['port']}")
-    print(f"  Local URL: http://{cfg['server']['hostname']}:{cfg['server']['port']}")
+    print(f"  Backend on http://{cfg['server']['host']}:{cfg['server']['port']}")
+    print(f"  Public URL: via the hub at /chat")
     print(f"  Messages expire after {cfg['chat']['message_ttl_seconds']}s")
     print(f"  Users file: {cfg['auth']['users_file']}")
     print()

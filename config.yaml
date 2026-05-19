@@ -3,8 +3,9 @@
 # ─────────────────────────────────────────────
 
 server:
-  host: "0.0.0.0"            # Bind to all interfaces (filtered to LAN in app)
-  port: 80
+  # Bind to loopback — public access happens via the hub on :80 → /chat
+  host: "127.0.0.1"
+  port: 8001
   hostname: "chat.home"      # Local DNS name (add to /etc/hosts or dnsmasq)
 
 auth:

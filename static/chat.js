@@ -1,7 +1,10 @@
 (() => {
     "use strict";
 
-    const socket = io();
+    const PREFIX = (window.__APP_PREFIX__ || "").replace(/\/$/, "");
+    const url = (p) => PREFIX + p;
+
+    const socket = io({ path: url("/socket.io") });
     const messagesList = document.getElementById("messagesList");
     const messagesContainer = document.getElementById("messagesContainer");
     const messageInput = document.getElementById("messageInput");
@@ -165,7 +168,7 @@
                     ${escHtml(fname)}
                 </a>`;
             } else {
-                html += `<a class="msg-file" href="/files/${encodeURIComponent(msg.file_id)}" download="${escAttr(fname)}">
+                html += `<a class="msg-file" href="${url('/files/')}${encodeURIComponent(msg.file_id)}" download="${escAttr(fname)}">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
@@ -200,18 +203,18 @@
         const origText = linkEl.textContent;
         linkEl.textContent = "Decrypting...";
         try {
-            const resp = await fetch(`/files/${encodeURIComponent(fileId)}`);
+            const resp = await fetch(`${url('/files/')}${encodeURIComponent(fileId)}`);
             if (!resp.ok) throw new Error(resp.statusText);
             // Server stores the encrypted file as base64 text
             const base64Ciphertext = await resp.text();
             const decryptedBuf = E2E.decryptFileBase64(base64Ciphertext);
             const blob = new Blob([decryptedBuf]);
-            const url = URL.createObjectURL(blob);
+            const objectUrl = URL.createObjectURL(blob);
             const a = document.createElement("a");
-            a.href = url;
+            a.href = objectUrl;
             a.download = filename;
             a.click();
-            URL.revokeObjectURL(url);
+            URL.revokeObjectURL(objectUrl);
         } catch (e) {
             alert(`Decryption failed: ${e.message}`);
         }
@@ -301,7 +304,7 @@
 
                 const formData = new FormData();
                 formData.append("file", uploadBody, uploadFilename_str);
-                const resp = await fetch("/upload", { method: "POST", body: formData });
+                const resp = await fetch(url("/upload"), { method: "POST", body: formData });
                 if (!resp.ok) {
                     alert(`Upload failed: ${resp.statusText}`);
                     return;
